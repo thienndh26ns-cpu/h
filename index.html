@@ -1,0 +1,101 @@
+ <!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>/* ================= 1. PHỔ NHIỆT ĐỘ MÀU TOÀN TRANG (NGÀY & ĐÊM) ================= */
+        :root {
+            --bg-sky-gradient: linear-gradient(155deg, rgba(224, 242, 254, 0.22) 0%, rgba(56, 189, 248, 0.16) 24%, #0b1936 58%, #020617 100%);
+            --bg-sidebar: rgba(7, 15, 34, 0.92);
+            --bg-card: rgba(12, 23, 48, 0.9);
+            --bg-sub: rgba(15, 29, 60, 0.82);
+            --bg-header: rgba(6, 13, 30, 0.94);
+            --border: rgba(125, 211, 252, 0.24);
+            --text-main: #f0f9ff;
+            --text-muted: #93c5fd;
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+            --safe: #10b981; --warn: #f59e0b; --danger: #f43f5e;
+            --shadow: 0 8px 26px rgba(2, 6, 23, 0.55);
+            --sidebar-w: 250px;
+        }
+
+        body.day-theme {
+            --bg-sky-gradient: linear-gradient(145deg, #f0f2f5 0%, #fffbeb 40%, #fed7aa 80%, #fecaca 100%);
+            --bg-sidebar: rgba(255, 255, 255, 0.94);
+            --bg-card: rgba(255, 255, 255, 0.96);
+            --bg-sub: rgba(248, 250, 252, 0.95);
+            --bg-header: rgba(255, 255, 255, 0.96);
+            --border: rgba(203, 213, 225, 0.85);
+            --text-main: #1c1e21;
+            --text-muted: #65676b;
+            --accent: #0866ff;
+            --accent-2: #7c3aed;
+            --safe: #059669; --warn: #d97706; --danger: #dc2626;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; transition: background-color 0.25s ease, color 0.2s ease, border-color 0.2s ease; }
+        body {
+            background: var(--bg-sky-gradient) !important;
+            background-attachment: fixed !important;
+            color: var(--text-main);
+            line-height: 1.55;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ================= 2. INTRO BẦU TRỜI, MÂY, SAO & THÁP CANH ================= */
+        #welcomeScreen { position: relative; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 24px; overflow: hidden; }
+        .sky-horizon-backdrop {
+            position: absolute; inset: 0; z-index: 0; pointer-events: none;
+            background: radial-gradient(circle at 84% 10%, rgba(224, 242, 254, 0.32) 0%, rgba(56, 189, 248, 0.14) 30%, transparent 65%);
+        }
+        body.day-theme .sky-horizon-backdrop {
+            background: radial-gradient(circle at 16% 9%, rgba(255, 255, 255, 0.95) 0%, rgba(254, 215, 170, 0.45) 38%, rgba(254, 202, 202, 0.35) 75%, transparent 100%);
+        }
+        .night-stars-layer {
+            position: absolute; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                radial-gradient(1.5px 1.5px at 12% 18%, #ffffff 90%, transparent),
+                radial-gradient(2px 2px at 26% 11%, #bae6fd 90%, transparent),
+                radial-gradient(1.2px 1.2px at 38% 24%, #ffffff 90%, transparent),
+                radial-gradient(1.8px 1.8px at 54% 9%, #e0f2fe 90%, transparent),
+                radial-gradient(1.3px 1.3px at 68% 21%, #ffffff 90%, transparent),
+                radial-gradient(2px 2px at 81% 15%, #fde047 90%, transparent),
+                radial-gradient(1.5px 1.5px at 91% 28%, #ffffff 90%, transparent);
+            animation: starTwinkle 4s ease-in-out infinite alternate;
+        }
+        body.day-theme .night-stars-layer { opacity: 0; }
+        @keyframes starTwinkle { 0% { opacity: 0.55; } 100% { opacity: 1; } }
+
+        .distant-celestial {
+            position: absolute; top: 9%; right: 16%; width: 42px; height: 42px; border-radius: 50%; z-index: 1;
+            background: radial-gradient(circle at 35% 35%, #f8fafc 20%, #cbd5e1 75%, #94a3b8 100%);
+            box-shadow: 0 0 28px rgba(226, 232, 240, 0.65), 0 0 60px rgba(56, 189, 248, 0.25);
+        }
+        body.day-theme .distant-celestial {
+            top: 8%; left: 16%; right: auto; width: 46px; height: 46px;
+            background: radial-gradient(circle, #ffffff 15%, #fef08a 55%, #f59e0b 100%);
+            box-shadow: 0 0 40px #fbbf24, 0 0 90px rgba(245, 158, 11, 0.65);
+        }
+
+        .tactical-stage { position: relative; width: 360px; max-width: 94vw; height: 220px; margin: 0 auto 12px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; z-index: 2; }
+        .watchtower-wrap { position: relative; z-index: 3; width: 92px; height: 105px; margin-bottom: -14px; opacity: 0; animation: towerRise 0.8s ease-out 0.1s forwards; }
+        .shield-svg-wrap { position: relative; z-index: 4; width: 112px; height: 120px; opacity: 0; animation: shieldPop 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards; }
+        @keyframes towerRise { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shieldPop { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+
+        .welcome-content { position: relative; z-index: 5; max-width: 680px; }
+        .welcome-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 15px; border-radius: 999px; background: var(--bg-card); border: 1px solid var(--border); color: var(--accent); font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; }
+        .welcome-title { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.6px; margin-bottom: 6px; }
+        .welcome-title span { background: linear-gradient(90deg, var(--accent), #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .welcome-sub { font-size: 0.96rem; color: var(--text-muted); max-width: 540px; margin: 0 auto 20px; }
+        .start-btn { background: linear-gradient(135deg, #0866ff, #7c3aed); color: #fff; border: none; padding: 13px 34px; border-radius: 999px; font-size: 1rem; font-weight: 800; cursor: pointer; box-shadow: 0 10px 26px rgba(8, 102, 255, 0.38); }
+        .start-btn:hover { transform: translateY(-2px); }
+
+        /* ================= 3. MÀN HÌNH PHÂN LUỒNG 5 GIÂY ================= */
